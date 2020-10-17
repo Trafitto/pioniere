@@ -6,61 +6,34 @@
 </h1>
 
 <h3 align="center">
-  Pioniere
+  Pioniere 🧭
 </h3>
 
-<p align="center">
-  <a href="#-about-the-project">About the project</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-technologies">Technologies</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-getting-started">Getting started</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-how-to-contribute">How to contribute</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#-license">License</a>
-</p>
+
 
 ## 💻 About the project
 
 - <p>Immerse yourself and explore things never seen before, just like our ancestors did.</p>
 
+- <p>Search and watch videos with near 0 views on Youtube</p>
 ## 🚀 Technologies
 
-- <!-- Put each technology here, start each line with an "-" because of the style -->
+ <!-- Put each technology here, start each line with an "-" because of the style -->
+
+- Express for backend
+- Vue for frontend
 
 ## 💻 Getting started
 
--a <!-- Here you can put how to setup your application -->
+ <!-- Here you can put how to setup your application -->
 
-### Requirements
+- The project is fresh, I will add more details as I go
 
-- <!-- put each requirement here -->
-
-**Clone the project and access the folder**
-
-<!-- you can put the commands inside the three grave accents -->
-
-```bash
-
-```
-
-**Follow the steps below**
-
-<!-- you can put the commands inside the three grave accents -->
-
-```bash
-
-```
 
 ## 🤔 How to contribute
 
 **Make a fork of this repository**
 
-```bash
-# Fork using GitHub official command line
-# If you don't have the GitHub CLI, use the web site to do that.
-
-$ gh repo fork EliasGcf/NOME_DO_REPO
-```
-
-**Follow the steps below**
 
 ```bash
 # Clone your fork
@@ -77,8 +50,4 @@ $ git push origin my-feature
 ```
 
 After your pull request is merged, you can delete your branch
-
-## 📝 License
-
-<!-- You can delete the license if you don't want it -->
 
