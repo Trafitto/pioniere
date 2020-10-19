@@ -121,6 +121,8 @@ class YoutubeController {
         }
 
         console.log(targetPage);
+
+        // TODO get target page video views
     }
 }
 
