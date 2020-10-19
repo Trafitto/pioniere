@@ -9,6 +9,11 @@ class YoutubeController {
         this.SEARCH_COUNTER = 0;
     }
 
+    /**
+     * Create the object required to call Youtube APIs
+     * 
+     * @param {string} query - The search term
+     */
     _collectSearchParams(query) {
         return {
             part: "snippet",
@@ -19,6 +24,12 @@ class YoutubeController {
         }
     }
 
+    /**
+     * Create an object where video IDs are keys, and 'snippet' is the value
+     * useful when extracting video statistics
+     * 
+     * @param {object[]} items - Youtube API results
+     */
     _remapSearchResults(items) {
         return items.reduce((map, item) => {
             map[item.id.videoId] = item.snippet
@@ -26,6 +37,12 @@ class YoutubeController {
         }, {})
     }
 
+    /**
+     * Send an API call to Google
+     * implemented a basic counter to check how many requests are being made to Youtube
+     * 
+     * @param {object} params - Youtube API search params
+     */
     _doSearch(params) {
         return this.client.search.list(params).then(res => {
             console.log(`Search counter: ${this.SEARCH_COUNTER}`);
@@ -34,6 +51,16 @@ class YoutubeController {
         })
     }
 
+    /**
+     * Send API calls to Youtube and increase currentPage until
+     * reaches 'pageNumber' provided, then return that page's response
+     * Recursive 'fetchPage' inside
+     * 
+     * 
+     * @param {int} pageNumber - Target page number
+     * @param {string} query - The search term
+     * @param {string} pageToken - The first pageToken to be used
+     */
     async _moveToPage(pageNumber, query, pageToken) {
         let currentPage = 1
 
@@ -55,6 +82,13 @@ class YoutubeController {
         return fetchPage(pageToken);
     }
 
+    /**
+     * The method which starts the algorithm
+     * 
+     * @param {string} query - The search term
+     * @param {int} maxResults - The number of maximum filtered results
+     * @param {int} expectedViews - Target number of views
+     */
     async getLessViews(query, maxResults = 10, expectedViews = 100) {
         let totalResults = null;
         let pagesNumber = null;
@@ -62,6 +96,7 @@ class YoutubeController {
         let nextPageToken = null
         let firstSearchResult = null
 
+        // Fetch first page to check number of total results
         try {
             firstSearchResult = await this._doSearch(this._collectSearchParams(query));
             nextPageToken = firstSearchResult.pageToken;
@@ -75,6 +110,7 @@ class YoutubeController {
             throw new Error("too many pages to fetch, please restrict your search");
         }
 
+        // Move to a specific page
         const nextPage = Math.floor(pagesNumber / 2);
         let targetPage = null;
         try {
@@ -85,10 +121,6 @@ class YoutubeController {
         }
 
         console.log(targetPage);
-    }
-
-    getResults(query) {
-        return this.getLessViews(query);
     }
 }
 

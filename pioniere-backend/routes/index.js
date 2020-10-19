@@ -16,7 +16,7 @@ router.get('/search', async (req, res, next) => {
   }
 
   try {
-    const items = await ytController.getResults(req.query.q);
+    const items = await ytController.getLessViews(req.query.q);
     res.send(items).status(200);
   } catch (e) {
     res.send(e).status(500);
