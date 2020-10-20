@@ -16,9 +16,11 @@ router.get('/search', async (req, res, next) => {
   }
 
   try {
-    const items = await ytController.getLessViews(req.query.q);
+    const query = decodeURIComponent(req.query.q);
+    const items = await ytController.getLessViews(query);
     res.send(items).status(200);
   } catch (e) {
+    console.error(e)
     res.send(e).status(500);
   }
 })

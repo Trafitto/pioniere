@@ -6,7 +6,6 @@ class YoutubeController {
             version: "v3",
             auth: process.env.YOUTUBE_API_KEY
         });
-        this.SEARCH_COUNTER = 0;
     }
 
     /**
@@ -25,6 +24,15 @@ class YoutubeController {
     }
 
     /**
+     * Get all video ids from a 'search.list' result items list
+     * 
+     * @param {object[]} items - Youtube API results
+     */
+    _collectPageVideoIds(items) {
+        return items.map(item => item.id.videoId)
+    }
+
+    /**
      * Create an object where video IDs are keys, and 'snippet' is the value
      * useful when extracting video statistics
      * 
@@ -32,9 +40,22 @@ class YoutubeController {
      */
     _remapSearchResults(items) {
         return items.reduce((map, item) => {
-            map[item.id.videoId] = item.snippet
-            return map
-        }, {})
+            map[item.id.videoId.toString()] = item.snippet;
+            return map;
+        }, {});
+    }
+
+    /**
+     * Create an object where video IDs are keys
+     * and their viewCount is value
+     * 
+     * @param {object[]} items - Youtube API results
+     */
+    _remapStatisticResults(items) {
+        return items.reduce((map, item) => {
+            map[item.id.toString()] = parseInt(item.statistics.viewCount);
+            return map;
+        }, {});
     }
 
     /**
@@ -45,10 +66,20 @@ class YoutubeController {
      */
     _doSearch(params) {
         return this.client.search.list(params).then(res => {
-            console.log(`Search counter: ${this.SEARCH_COUNTER}`);
-            this.SEARCH_COUNTER++;
             return res.data;
         })
+    }
+
+    /**
+     * Retrieve all statistics for a list of videos
+     * 
+     * @param {string[]} videoIds - List of retrieved video IDs
+     */
+    _getVideoStatistics(videoIds) {
+        return this.client.videos.list({
+            part: "statistics",
+            id: videoIds.join(',')
+        }).then(res => res.data)
     }
 
     /**
@@ -94,35 +125,48 @@ class YoutubeController {
         let pagesNumber = null;
 
         let nextPageToken = null
-        let firstSearchResult = null
+        let targetPage = null
 
         // Fetch first page to check number of total results
         try {
-            firstSearchResult = await this._doSearch(this._collectSearchParams(query));
-            nextPageToken = firstSearchResult.pageToken;
-            totalResults = firstSearchResult.pageInfo.totalResults;
+            targetPage = await this._doSearch(this._collectSearchParams(query));
+            nextPageToken = targetPage.pageToken;
+            totalResults = targetPage.pageInfo.totalResults;
             pagesNumber = Math.floor(totalResults / 50);
         } catch (e) {
             throw new Error(`Unable to fetch Youtube results, error: ${e.response.data.error.message}`);
         }
 
+        /*
+        // Move to a specific page
         if (pagesNumber > 20) {
             throw new Error("too many pages to fetch, please restrict your search");
         }
-
-        // Move to a specific page
         const nextPage = Math.floor(pagesNumber / 2);
-        let targetPage = null;
         try {
             targetPage = await this._moveToPage(nextPage, query, nextPageToken);
         } catch (e) {
             console.error(e);
             throw e;
         }
+        */
 
-        console.log(targetPage);
+        const pageItems = targetPage.items;
+        if(!targetPage.items.length){
+            throw new Error("There are no results for this search");
+        }
 
-        // TODO get target page video views
+        const pageVideoIds = this._collectPageVideoIds(pageItems);
+
+        let pageViews = null;
+        try {
+            pageViews = await this._getVideoStatistics(pageVideoIds)
+                .then(data => this._remapStatisticResults(data.items));
+        } catch (e) {
+            throw new Error(`Unable to retrieve page statistics, error: ${e.response.data.error.message}`);
+        }
+
+        return pageViews;
     }
 }
 
