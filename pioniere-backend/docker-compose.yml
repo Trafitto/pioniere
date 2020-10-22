@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+    pioniere-backend:
+        container_name: pioniere-backend
+        image: pioniere/pioniere-backend
+        build: ./
+        #command: tail -f /dev/null
+        ports:
+            - "3000:3000"
