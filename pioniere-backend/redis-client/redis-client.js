@@ -2,29 +2,38 @@ var redis = require('redis');
 
 class RedisClient {
     constructor() {
-        this.client= this.getClient()
+        this.client = this.getClientInstance();
+
         this.client.on('error', function (err) {
             console.log('Error ' + err);
-        }); 
-        
-        this.client.on('connect', function() {
+        });
+
+        this.client.on('connect', function () {
             console.log('Connected to Redis');
         });
     }
-    getClient(){
-        if(this.client)
-            return this.client
-        this.client = redis.createClient({host:'redis', port: 6379})
-        return this.client 
+
+    getClientInstance() {
+        if (this.client) return this.client
+        const redisClient = redis.createClient({
+            host: 'redis',
+            port: process.env.REDIS_PORT || 6379
+        })
+        return redisClient
     }
 
-    setObject(key, value){
+    setObject(key, value) {
         this.client.set(key, JSON.stringify(value))
     }
 
-    getObject(key){
-        let value = this.client.get(key)
-        return JSON.parse(value)
+    getObject(key, deserialize = true) {
+        return new Promise((resolve, reject) => {
+            this.client.get(key, (error, value) => {
+                if (error) reject(error)
+                if (deserialize) value = JSON.parse(value)
+                resolve(value)
+            })
+        })
     }
 }
 
