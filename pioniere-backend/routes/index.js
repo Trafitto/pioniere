@@ -21,23 +21,26 @@ router.get('/search', async (req, res, next) => {
   try {
     const query = decodeURIComponent(req.query.q);
 
-    // Search inside Redis
-    //  TODO: Fix Redis get
-    //let items =  redisClient.getObject(query);
-    let items =  null
-    
-    console.log(items)
-    if (!items){
-      console.log("Object not found on redis, search on YT")
-      ytController.getLessViews(query).then(response =>{
-      items = response
-      redisClient.setObject(query, items);
-     }).catch(error => {
-      console.log(error)
-     })
+    let items
+    try {
+      items = await redisClient.getObject(query);
+    } catch (e) {
+      res.send(e).status(500);
     }
-    console.log(items)
-    res.send(items).status(200);
+
+    if (items) {
+      console.log('Sending back items from redis');
+      res.json(items).status(200);
+    } else {
+      items = await ytController.getLessViews(query);
+      try {
+        await redisClient.setObject(query, items);
+        console.log('Sending back items from APIs');
+        res.send(items).status(200);
+      } catch (e) {
+        res.send(e).status(500);
+      }
+    }
   } catch (e) {
     console.error(e)
     res.send(e).status(500);
