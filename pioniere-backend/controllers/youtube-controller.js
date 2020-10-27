@@ -165,7 +165,7 @@ class YoutubeController {
         } catch (e) {
             throw new Error(`Unable to retrieve page statistics, error: ${e.response.data.error.message}`);
         }
-
+        
         return pageViews;
     }
 }
